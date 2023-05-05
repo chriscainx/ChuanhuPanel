@@ -83,6 +83,10 @@ class BaseLLMModel:
         self.api_key = None
         self.need_api_key = False
         self.single_turn = False
+        self.use_qa_example = False
+        self.use_induction = False
+        self.qa_example = []
+        self.induction = []
 
         self.temperature = temperature
         self.top_p = top_p
@@ -276,7 +280,11 @@ class BaseLLMModel:
         use_websearch=False,
         files=None,
         reply_language="中文",
-        should_check_token_count=True,
+        use_qa_example=False,
+        use_induction=False,
+        qa_example=None,
+        induction=None,
+        should_check_token_count=True
     ):  # repetition_penalty, top_k
 
         status_text = "开始生成回答……"
@@ -287,6 +295,11 @@ class BaseLLMModel:
             yield chatbot + [(inputs, "")], status_text
         if reply_language == "跟随问题语言（不稳定）":
             reply_language = "the same language as the question, such as English, 中文, 日本語, Español, Français, or Deutsch."
+
+        self.use_qa_example = use_qa_example
+        self.qa_example = qa_example
+        self.use_induction = use_induction
+        self.induction = induction
 
         limited_context, fake_inputs, display_append, inputs, chatbot = self.prepare_inputs(real_inputs=inputs, use_websearch=use_websearch, files=files, reply_language=reply_language, chatbot=chatbot)
         yield chatbot + [(fake_inputs, "")], status_text
@@ -382,6 +395,10 @@ class BaseLLMModel:
         use_websearch=False,
         files=None,
         reply_language="中文",
+        use_qa_example=False,
+        use_induction=False,
+        qa_example=None,
+        induction=None
     ):
         logging.debug("重试中……")
         if len(self.history) > 0:
@@ -401,6 +418,10 @@ class BaseLLMModel:
             use_websearch=use_websearch,
             files=files,
             reply_language=reply_language,
+            use_qa_example=use_qa_example,
+            use_induction=use_induction,
+            qa_example=qa_example,
+            induction=induction
         )
         for x in iter:
             yield x

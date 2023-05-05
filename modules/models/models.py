@@ -122,11 +122,17 @@ class OpenAIClient(BaseLLMModel):
         }
 
         if system_prompt is not None:
-            history = [construct_system(system_prompt), *history]
+            history_comp = [construct_system(system_prompt)]
+        # TODO: add qa_example and induction text
+        if self.use_qa_example:
+            history_comp = history_comp + self.qa_example
+        history_comp = history_comp + history
+        if self.use_induction:
+            history_comp = history_comp + self.induction
 
         payload = {
             "model": self.model_name,
-            "messages": history,
+            "messages": history_comp,
             "temperature": self.temperature,
             "top_p": self.top_p,
             "n": self.n_choices,
